@@ -2676,8 +2676,75 @@
     #screen-roadsocial { z-index: 200; }
     #rs-checkin, #rs-amis, #rs-carte, #rs-reputation, #rs-chat { z-index: 250; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+  <!-- ══════════════════════════════════════
+       ÉCRAN CONNEXION
+  ══════════════════════════════════════ -->
+  <div id="screen-auth" style="position:fixed;inset:0;z-index:1000;background:#1A2F5E;display:flex;flex-direction:column;align-items:center;padding:56px 28px 32px;overflow-y:auto;">
+    <div style="width:100%;max-width:375px;">
+      <div style="text-align:center;margin-bottom:40px;">
+        <div style="width:72px;height:72px;background:linear-gradient(135deg,#FF6B35,#e55a26);border-radius:18px;display:inline-flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 8px 24px rgba(255,107,53,0.4);margin-bottom:20px;">🚛</div>
+        <div style="font-size:26px;font-weight:900;color:#fff;letter-spacing:2px;text-transform:uppercase;">THINKER'S JOB</div>
+        <div style="font-size:12px;color:#FF6B35;font-weight:700;letter-spacing:3px;margin-top:6px;text-transform:uppercase;">Connexion</div>
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:11px;color:rgba(255,255,255,0.55);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Email</label>
+        <input id="auth-email" type="email" placeholder="ton@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('auth-password').focus()" style="width:100%;padding:14px 16px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);border-radius:12px;color:#fff;font-size:15px;outline:none;-webkit-appearance:none;" />
+      </div>
+      <div style="margin-bottom:8px;">
+        <label style="display:block;font-size:11px;color:rgba(255,255,255,0.55);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Mot de passe</label>
+        <input id="auth-password" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" style="width:100%;padding:14px 16px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);border-radius:12px;color:#fff;font-size:15px;outline:none;-webkit-appearance:none;" />
+      </div>
+      <div id="auth-error" style="min-height:22px;font-size:12px;color:#ff6b6b;margin-bottom:14px;text-align:center;padding-top:4px;"></div>
+      <button id="auth-login-btn" onclick="doLogin()" style="width:100%;padding:16px;background:linear-gradient(135deg,#FF6B35,#e55a26);border:none;border-radius:14px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;letter-spacing:1px;margin-bottom:16px;box-shadow:0 6px 20px rgba(255,107,53,0.35);">Se connecter →</button>
+      <div style="text-align:center;font-size:14px;color:rgba(255,255,255,0.45);">
+        Pas encore de compte ?
+        <span onclick="openSignup()" style="color:#FF6B35;font-weight:700;cursor:pointer;"> Créer un compte</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ÉCRAN INSCRIPTION
+  ══════════════════════════════════════ -->
+  <div id="screen-signup" style="position:fixed;inset:0;z-index:1010;background:#1A2F5E;display:none;flex-direction:column;align-items:center;padding:48px 28px 32px;overflow-y:auto;">
+    <div style="width:100%;max-width:375px;">
+      <button onclick="closeSignup()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:14px;font-weight:600;cursor:pointer;margin-bottom:24px;padding:0;display:flex;align-items:center;gap:6px;">← Retour</button>
+      <div style="text-align:center;margin-bottom:28px;">
+        <div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:1px;">Créer un compte</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.45);margin-top:6px;">Rejoins Thinker's Job gratuitement</div>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:11px;color:rgba(255,255,255,0.55);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Email</label>
+        <input id="signup-email" type="email" placeholder="ton@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('signup-password').focus()" style="width:100%;padding:14px 16px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);border-radius:12px;color:#fff;font-size:15px;outline:none;-webkit-appearance:none;" />
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="display:block;font-size:11px;color:rgba(255,255,255,0.55);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Mot de passe <span style="opacity:0.5;font-weight:400;">(6 caractères min.)</span></label>
+        <input id="signup-password" type="password" placeholder="••••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter')doSignup()" style="width:100%;padding:14px 16px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);border-radius:12px;color:#fff;font-size:15px;outline:none;-webkit-appearance:none;" />
+      </div>
+      <div style="margin-bottom:24px;">
+        <label style="display:block;font-size:11px;color:rgba(255,255,255,0.55);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">Je suis un...</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <label id="signup-type-worker-label" style="display:flex;align-items:center;gap:10px;padding:14px;background:rgba(255,255,255,0.06);border:2px solid #FF6B35;border-radius:12px;cursor:pointer;">
+            <input type="radio" name="signup-type" value="worker" checked onchange="highlightType()" style="display:none;" />
+            <span style="font-size:24px;">🚛</span>
+            <div><div style="font-size:13px;font-weight:700;color:#fff;">Worker</div><div style="font-size:10px;color:rgba(255,255,255,0.4);">Camionneur</div></div>
+          </label>
+          <label id="signup-type-trader-label" style="display:flex;align-items:center;gap:10px;padding:14px;background:rgba(255,255,255,0.06);border:2px solid transparent;border-radius:12px;cursor:pointer;">
+            <input type="radio" name="signup-type" value="trader" onchange="highlightType()" style="display:none;" />
+            <span style="font-size:24px;">🛍️</span>
+            <div><div style="font-size:13px;font-weight:700;color:#fff;">Trader</div><div style="font-size:10px;color:rgba(255,255,255,0.4);">Voyageur</div></div>
+          </label>
+        </div>
+      </div>
+      <div id="signup-error" style="min-height:22px;font-size:12px;color:#ff6b6b;margin-bottom:14px;text-align:center;"></div>
+      <button id="signup-btn" onclick="doSignup()" style="width:100%;padding:16px;background:linear-gradient(135deg,#FF6B35,#e55a26);border:none;border-radius:14px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;letter-spacing:1px;margin-bottom:14px;box-shadow:0 6px 20px rgba(255,107,53,0.35);">Créer mon compte →</button>
+      <div style="font-size:11px;color:rgba(255,255,255,0.25);text-align:center;">En créant un compte, tu acceptes nos conditions d'utilisation.</div>
+    </div>
+  </div>
 
   <!-- ══════════════════════════════════════
        ESPACE WORKER — DASHBOARD
@@ -3062,7 +3129,7 @@
       </button>
 
       <!-- Logout -->
-      <button class="logout-btn" data-i18n="profil.logout" onclick="showComingSoon()">⏻ Se déconnecter</button>
+      <button class="logout-btn" data-i18n="profil.logout" onclick="doLogout()">⏻ Se déconnecter</button>
     </div>
   </div>
 
@@ -3493,7 +3560,7 @@
       </button>
 
       <!-- Logout -->
-      <button class="logout-btn" data-i18n="profil.logout" onclick="showComingSoon()">⏻ Se déconnecter</button>
+      <button class="logout-btn" data-i18n="profil.logout" onclick="doLogout()">⏻ Se déconnecter</button>
     </div>
   </div>
 
@@ -4176,6 +4243,13 @@
   </div>
 
   <script>
+    /* ── Supabase ── */
+    const { createClient } = supabase;
+    const SUPABASE_URL = 'https://ejmscliggzfulhgrebbj.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_ejhOdKg93lK3QoYPCfmw9g_Z6zPXPii';
+    const _sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+    let currentUser = null;
+
     /* ── i18n ── */
     let currentLang = 'fr';
     let currentCurrency = 'EUR';
@@ -4634,9 +4708,13 @@
     /* ── Token state ── */
     let tokenBalance = 0;
 
-    function addTokens(amount) {
+    async function addTokens(amount, action) {
       tokenBalance += amount;
       syncTokenDisplay();
+      if (!currentUser) return;
+      await _sb.from('utilisateurs').update({ tokens: tokenBalance }).eq('id', currentUser.id);
+      await _sb.from('tokens_historique').insert({ utilisateur_id: currentUser.id, montant: amount, action: action || 'gain' });
+      currentUser.tokens = tokenBalance;
     }
 
     function syncTokenDisplay() {
@@ -5896,6 +5974,95 @@
       if (overlay) document.body.removeChild(overlay);
       renderChat();
     }
+
+    /* ── Auth Supabase ── */
+    async function initAuth() {
+      document.getElementById('screen-auth').style.display = 'flex';
+      try {
+        const { data: { session } } = await _sb.auth.getSession();
+        if (session) {
+          await _loadUser(session.user);
+          document.getElementById('screen-auth').style.display = 'none';
+        }
+      } catch(e) { /* garder l'écran de connexion visible */ }
+    }
+
+    async function _loadUser(authUser) {
+      const { data } = await _sb.from('utilisateurs').select('*').eq('id', authUser.id).single();
+      if (data) {
+        currentUser = data;
+        tokenBalance = data.tokens || 0;
+        syncTokenDisplay();
+      }
+    }
+
+    async function doLogin() {
+      const email = document.getElementById('auth-email').value.trim();
+      const pwd   = document.getElementById('auth-password').value;
+      const btn   = document.getElementById('auth-login-btn');
+      const err   = document.getElementById('auth-error');
+      if (!email || !pwd) { err.textContent = 'Email et mot de passe requis.'; return; }
+      btn.textContent = 'Connexion...'; btn.disabled = true; err.textContent = '';
+      const { data, error } = await _sb.auth.signInWithPassword({ email, password: pwd });
+      if (error) {
+        err.textContent = 'Email ou mot de passe incorrect.';
+        btn.textContent = 'Se connecter →'; btn.disabled = false;
+      } else {
+        await _loadUser(data.user);
+        document.getElementById('screen-auth').style.display = 'none';
+        btn.textContent = 'Se connecter →'; btn.disabled = false;
+      }
+    }
+
+    function openSignup() {
+      document.getElementById('screen-signup').style.display = 'flex';
+      highlightType();
+    }
+    function closeSignup() { document.getElementById('screen-signup').style.display = 'none'; }
+
+    function highlightType() {
+      const w = document.querySelector('input[name="signup-type"][value="worker"]').checked;
+      document.getElementById('signup-type-worker-label').style.borderColor = w ? '#FF6B35' : 'transparent';
+      document.getElementById('signup-type-trader-label').style.borderColor = w ? 'transparent' : '#FF6B35';
+    }
+
+    async function doSignup() {
+      const email = document.getElementById('signup-email').value.trim();
+      const pwd   = document.getElementById('signup-password').value;
+      const type  = document.querySelector('input[name="signup-type"]:checked')?.value || 'worker';
+      const btn   = document.getElementById('signup-btn');
+      const err   = document.getElementById('signup-error');
+      if (!email || !pwd) { err.textContent = 'Email et mot de passe requis.'; return; }
+      if (pwd.length < 6) { err.textContent = 'Mot de passe : 6 caractères minimum.'; return; }
+      btn.textContent = 'Création...'; btn.disabled = true; err.textContent = '';
+      const { data, error } = await _sb.auth.signUp({ email, password: pwd });
+      if (error) {
+        err.textContent = error.message;
+        btn.textContent = 'Créer mon compte →'; btn.disabled = false;
+        return;
+      }
+      await _sb.from('utilisateurs').insert({ id: data.user.id, email, mot_de_passe: '***', type, tokens: 0 });
+      currentUser = { id: data.user.id, email, type, tokens: 0 };
+      tokenBalance = 0;
+      document.getElementById('screen-signup').style.display = 'none';
+      document.getElementById('screen-auth').style.display = 'none';
+      btn.textContent = 'Créer mon compte →'; btn.disabled = false;
+      showToast('Bienvenue sur Thinker\'s Job ! 🎉', '#2EC4B6');
+    }
+
+    async function doLogout() {
+      await _sb.auth.signOut();
+      currentUser = null; tokenBalance = 0; syncTokenDisplay();
+      ['screen-worker','screen-trader','settings-screen','screen-minijeux','screen-roadsocial','founders-screen',
+       'sub-route','sub-tokens','sub-boutique','sub-profil','trad-boutique','trad-don','trad-commandes','trad-profil',
+       'mg-spin','mg-quiz','mg-defi','rs-checkin','rs-amis','rs-carte','rs-reputation'
+      ].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('visible'); });
+      if (routeActive) stopRouteSession();
+      document.getElementById('screen-auth').style.display = 'flex';
+      showToast('Déconnecté avec succès', '#FF6B35');
+    }
+
+    initAuth();
   </script>
 
 </body>
